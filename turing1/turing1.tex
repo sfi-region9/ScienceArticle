@@ -1,0 +1,202 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Define Article %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\documentclass[colorlinks]{article}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Using Packages %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\usepackage{geometry}
+\usepackage{graphicx}
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{empheq}
+\usepackage[french]{babel}
+\usepackage{mdframed}
+\usepackage{booktabs}
+\usepackage{lipsum}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{color}
+\usepackage{psfrag}
+\usepackage{pgfplots}
+\usepackage{bm}
+\usepackage{float}
+\usepackage{caption}
+\usepackage[french,frenchkw,boxruled]{algorithm2e}
+\usepackage{tikz}
+\usetikzlibrary{chains,fit,shapes}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% Other Settings
+
+%%%%%%%%%%%%%%%%%%%%%%%%%% Page Setting %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\geometry{a4paper}
+
+
+\SetKwInput{KwRes}{R\'esultat}%
+\SetKwInput{KwData}{Entrée}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Title & Author %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\title{Les Machines de Turing \\ Épisode 1 \\ Définition}
+\author{CMDR Charlotte THOMAS \\ USS Versailles, R9}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{document}
+    \maketitle
+    \begin{abstract}
+        Les termes de "Machine de Turing" ou encore de "Turing-complet" sont maintenant commun sur internet, même lors de 
+        simples articles pour le grand public. Ces termes réfèrent à des concepts en \textit{informatique théorique} qui 
+        est la science de l'étude de l'informatique au sens mathématique (et non au sens physique comme construire des ordinateurs)
+        plus particulièrement dans la discipline qu'on appelle la \textit{calculabilité}.\newline
+
+        Cependant, ces termes ne sont pas toujours bien défini, cette série d'articles va plonger dans l'univers de l'informatique 
+        théorique et de la calculabilité, mais tout d'abord définissons ce qu'est une \textit{Machine de Turing.}.\newline
+
+
+        Le niveau de lecture de cet article est difficile, surtout la partie formelle, mais est intéressante au niveau de 
+        l'histoire du concept, une présentation plus en détail, avec des exemples et une implémentation dans de nombreux langages 
+        (python, OCaml, B\#, etc.) sera faite lorsque ce sera le tour avec la liste des articles sur l'informatique théorique depuis 0.
+    \end{abstract}
+    \tableofcontents
+    \cleardoublepage
+    \section{Histoire}
+    Avant de définir intuitivement et formellement une telle machine, il faut en donner le contexte historique,
+    tout d'abord une Machine de Turing n'est pas une machine au sens réel, ce n'est pas un ordinateur ou une calculatrice, 
+    (bien que de nombreux chercheurs ont depuis construits de telles machines purement mécaniquement) c'est un \textit{concept mathématique},
+    un outil de calcul inventé par Turing dans son papier de 1936 sur la calculabilité, une machine de Turing, (qu'il appelait \textit{automatic machine}) 
+    est un modèle permettant d'exécuter un \textit{algorithme}. Un algorithme étant simplement une suite d'instruction
+    
+    \vspace{1em}
+    \begin{algorithm}[H]
+        \SetAlgoLined
+        \KwData{Céréales, Lait, Bol}
+        \KwRes{Bol de Céréales}
+        \nl Mettre les céréales dans le bol\;
+        \nl Verser du lait jusqu'à hauteur des céréales\;
+        \caption{Un exemple d'algorithme simple pour servir des céréales}
+    \end{algorithm}
+    \vspace{1em}
+    
+    Un algorithme est une suite d'instructions finie (i.e il n'y a pas un nombre infini d'instructions), 
+    \textbf{\textit{l'algorithmique}} est l'étude des algorithmes, s'ils finissent ou pas, comment les exécuter, leur rapidité 
+    d'exécution (dite \textbf{\textit{complexité temporelle}}), la place qu'ils prennent en mémoire (dite \textbf{\textit{complexité spatiale}}).\newline
+
+
+    Une fonction qui peut être représentée à l'aide d'un algorithme (comme ci-dessus pour créer un bol de céréale ou une fonction pour 
+    compter jusqu'à 1000) est dites \textbf{\textit{calculable}}, l'étude de ces fonctions et leur application en informatique théorique est 
+    \textcolor{red}{\textbf{\textit{la calculabilité}}} et c'est ce domaine qui a donné naissance aux Machines de Turing.
+    
+    \cleardoublepage
+    \section{Définition Intuitive}
+    Avant de définir formellement un tel objet, il est utile d'en faire une définition dites "intuitive" en effet, on peut la dessiner
+    et elle est bien plus facile à comprendre que la définition qui va suivre.\newline
+
+    Une Machine de Turing peut être représenté par un ruban qui s'étend à l'infini à droite, avec des cases, ce ruban représente à 
+    la fois la mémoire vive de la machine et l'entrée/sortie du programme, l'entrée étant l'état de la mémoire vive \textit{avant} 
+    de "démarrer" la machine et la sortie étant l'état de la mémoire vive à la \textit{sortie} du programme (quand, et si, il s'arrête)
+
+    \begin{figure}[H]
+    \center 
+    \begin{tikzpicture}
+\tikzstyle{every path}=[very thick]
+
+\edef\sizetape{0.7cm}
+\tikzstyle{tmtape}=[draw,minimum size=\sizetape]
+\tikzstyle{tmhead}=[arrow box,draw,minimum size=.5cm,arrow box
+arrows={east:.25cm, west:0.25cm}]
+
+%% Draw TM tape
+\begin{scope}[start chain=1 going right,node distance=-0.15mm]
+    \node [on chain=1,tmtape,draw=none] {$\ldots$};
+    \node [on chain=1,tmtape] {};
+    \node [on chain=1,tmtape] (input) {0};
+    \node [on chain=1,tmtape] {1};
+    \node [on chain=1,tmtape] {};
+    \node [on chain=1,tmtape] {1};
+    \node [on chain=1,tmtape] {1};
+    \node [on chain=1,tmtape] {};
+    \node [on chain=1,tmtape] {};
+    \node [on chain=1,tmtape,draw=none] {$\ldots$};
+    \node [on chain=1] {\textbf{Ruban entrée/sortie}};
+\end{scope}
+
+%% Draw TM Finite Control
+\begin{scope}
+[shift={(3cm,-5cm)},start chain=circle placed {at=(-\tikzchaincount*60:1.5)}]
+\node [on chain] {  \begin{tabular}{l l}
+    état,ruban  & nouvel état,écriture,mouvement\\
+    \hline
+    $q_0,1$                     & $q_1,0,d$ \\
+    $q_0,0$                     & $H,0,d$ \\
+    $\vdots$                   & $\vdots$\\
+  \end{tabular}};
+
+% Arrow to current state
+\node (center) {};
+
+\node[rounded corners,draw=black,thick,fit=(circle-1),
+			label=below:\textbf{$\delta$ fonction de transfert}] (fsbox)
+		{};
+\end{scope}
+
+%% Draw TM head below (input) tape cell
+\node [tmhead,yshift=-.3cm] at (input.south) (head) {$q_1$};
+
+%% Link Finite Control with Head
+\path[->,draw] (fsbox.north) .. controls (4.5,-1) and (0,-2) .. node[right] 
+			(headlinetext)
+ 			{} 
+			(head.south);
+\node[xshift=3cm] at (headlinetext)  
+			{\begin{tabular}{c} 
+				\textbf{Tête de lecture/écriture} \\  
+				\textbf{(peut aller à droite/gauche)} 
+			 \end{tabular}};
+
+\end{tikzpicture}     
+    \caption{Représentation d'une Machine de Turing \cite{turing}}
+    \end{figure}
+    
+    Au fur et à mesure du programme (qui est la fameuse fonction $\delta$ représenté par le tableau de transfert) la tête de lecture/écriture 
+    va bouger et modifier le ruban en fonction du programme et de l'entrée, une fois arrivé dans l'état de fin (par exemple l'état H pour HALTE)
+    le programme s'arrête et le ruban devient alors la sortie du programme. Un problème dont on reviendra plus tard est savoir si oui ou non 
+    un programme s'arrête pour une certaine entrée voir pour toute, ce problème nommé "problème de l'arrêt" a été grandement discuté par Turing lui même 
+    dans plusieurs papiers, grâce aux outils qu'il a développés il a pu prouver en 1937 que le problème était \textit{indécidable}, c'est-à-dire que dans nos systèmes de logique usuels il n'existe pas de preuve qu'il soit vrai, 
+    ou de preuve qu'il soit faux. \cite{arret}
+
+\cleardoublepage
+\section{Définition formelle}
+Voici enfin la partie où l'ont défini formellement ce qu'est qu'une machine de Turing, il y a de nombreuses définitions formelles 
+développées par-dessus le concept de Turing, la définition communément utilisée est celle de Lewis dans son livre de 1982, puis la 
+réédition en 1998, \textit{Elements of the Theory of Computation} au chapitre 4, définition 4.1.1, page 181 \cite{elements} que suit\newline
+
+
+Il définit une machine de Turing 
+comme un 5-uplet $(K,\Sigma,\delta,s,H)$ avec $K$ l'ensemble fini d'états possible de la machine, $\Sigma$ est l'alphabet qui contient 
+le caractère nul et le caractère marquant le début du ruban, $s \in K$ est l'état initial de la machine, $\delta$ est la fonction 
+de transition des états formellement $(K - H) \times \Sigma \to K \times (\Sigma \cup \{\leftarrow,\rightarrow\})$
+(elle prend en entrée un couple formé d'un état non sortant et d'un état du ruban lu et 
+renvoi un couple du nouvel état de la machine et du nouvel état à écrire ou s'il faut bouger à gauche ou à droite, ce qui 
+revient à un nouvel état à écrire ET s'il faut bouger à gauche/droite), et enfin $H \subset K$ est l'ensemble des états 
+finaux dit "de halte".\newline
+
+
+Pour une machine de Turing dite, \textit{binaire}, avec le caractère $2$ comme caractère vide, 
+il y a un seul état sortant dénoté $\bar{H}$ (pour éviter de le confondre avec le H de la définition, ils sont ensuite confondus) 
+les autres états sont des entiers. 
+Les caractères $r,l,*$ respectivement signifient aller à droite, aller à gauche, et ne pas bouger.
+Enfin la fonction $\delta$ est découpé en trois fonctions (pour pouvoir l'implémenter 
+avec uniquement des matrices normales) $\delta_1,\delta_2,\delta_3$ donnant respectivement 
+le nouvel état, ce qu'il faut écrire sur le ruban, et comment il faut bouger la tête
+ on a donc quelque chose comme ci-dessous.
+\begin{align*}
+    K &= H \cup Q && Q \subset \mathbb{N} \\
+    \Sigma &= \{0,1,2\} \\ 
+    s &= 0 \\ 
+    H &= \{\bar{H}\} \\ 
+    \delta_1 &: Q \times \Sigma \to K \\ 
+    \delta_2 &: Q \times \Sigma \to \Sigma \\ 
+    \delta_3 &: Q \times \Sigma \to \{r,l,*\}
+\end{align*}
+
+    \bibliography{turing}
+    \bibliographystyle{unsrt}
+\end{document}
